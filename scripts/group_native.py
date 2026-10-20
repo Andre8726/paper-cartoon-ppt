@@ -11,12 +11,30 @@ NS={'p':P,'a':A}
 ET.register_namespace('p',P); ET.register_namespace('a',A)
 def tag(ns,n): return '{'+ns+'}'+n
 
-def group_native(source, target):
+def group_native(source, target, config):
+    if Path(source).resolve()==Path(target).resolve():
+        raise ValueError('Use a separate output file; preserve the source.')
     with ZipFile(source) as z: data={n:z.read(n) for n in z.namelist()}
-    root=ET.fromstring(data['ppt/slides/slide1.xml'])
+    reports=[]
+    for rule in config.get('groups',[]):
+        number=rule['slide']
+        if not isinstance(number,int) or number<1: raise ValueError('Slide numbers start at 1.')
+        member=f'ppt/slides/slide{number}.xml'
+        if member not in data: raise ValueError(f'Missing slide: {number}')
+        root=ET.fromstring(data[member])
+        reports.extend(group_slide(root,rule['prefixes'],number))
+        data[member]=ET.tostring(root,encoding='utf-8',xml_declaration=True)
+    with ZipFile(target,'w',ZIP_DEFLATED) as z:
+        for n,b in data.items():z.writestr(n,b)
+    return {'groups_created':len(reports),'groups':reports}
+
+def group_slide(root, prefixes, slide_number):
     tree=root.find('p:cSld/p:spTree',NS)
-    prefixes=['stack-','device-','state-A-','state-B-','sim-hard-','sim-easy-']
+    if not isinstance(prefixes,list) or any(not isinstance(p,str) or not p for p in prefixes):
+        raise ValueError('Provide nonempty object prefixes explicitly.')
+    if len(set(prefixes))!=len(prefixes): raise ValueError('Duplicate prefixes.')
     next_id=max(int(e.get('id')) for e in root.findall('.//p:cNvPr',NS))+1
+    reports=[]
     for prefix in prefixes:
         members=[]; bounds=[]
         for e in list(tree):
@@ -27,7 +45,10 @@ def group_native(source, target):
             off=xf.find('a:off',NS); ext=xf.find('a:ext',NS)
             x,y=int(off.get('x')),int(off.get('y'));w,h=int(ext.get('cx')),int(ext.get('cy'))
             members.append(e);bounds.append((x,y,x+w,y+h))
-        if len(members)<2: continue
+        if len(members)<2: raise ValueError(f'Prefix {prefix!r} must match at least two native shapes.')
+        indexes=[list(tree).index(e) for e in members]
+        if indexes!=list(range(indexes[0],indexes[-1]+1)):
+            raise ValueError(f'Prefix {prefix!r} is interleaved with other objects; grouping would change z-order.')
         x=min(b[0] for b in bounds);y=min(b[1] for b in bounds)
         w=max(b[2] for b in bounds)-x;h=max(b[3] for b in bounds)-y
         g=ET.Element(tag(P,'grpSp'))
@@ -41,17 +62,11 @@ def group_native(source, target):
         index=list(tree).index(members[0])
         for e in members: tree.remove(e);g.append(e)
         tree.insert(index,g)
-    data['ppt/slides/slide1.xml']=ET.tostring(root,encoding='utf-8',xml_declaration=True)
-    with ZipFile(target,'w',ZIP_DEFLATED) as z:
-        for n,b in data.items():z.writestr(n,b)
-    report={'groups':len(root.findall('.//p:grpSp',NS)),
-            'native_shapes':len(root.findall('.//p:sp',NS)),
-            'pictures':len(root.findall('.//p:pic',NS)),
-            'texts':len(root.findall('.//a:t',NS))}
-    assert report['pictures']==0
-    assert report['groups']>=4 and report['native_shapes']>100
-    return report
+        reports.append({'slide':slide_number,'prefix':prefix,'members':len(members)})
+    return reports
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('source',type=Path);ap.add_argument('target',type=Path)
-    a=ap.parse_args();print(json.dumps(group_native(a.source,a.target)))
+    ap.add_argument('--config',type=Path,required=True,help='Diagram configuration JSON containing groups.')
+    a=ap.parse_args();config=json.loads(a.config.read_text(encoding='utf-8'))
+    print(json.dumps(group_native(a.source,a.target,config)))

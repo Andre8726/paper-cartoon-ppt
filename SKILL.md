@@ -22,19 +22,13 @@ description: 从论文 PDF 提取研究路线或作用机制，参考 ref 文件
 用户未指明 PDF 时，先查看本技能目录的 `ref_papers/`；其中只有一个 PDF 时直接使用，多个时根据用户上下文选择，仍无法确定则询问。忽略派生预览和抽取文本，只把 PDF 当作论文输入。
 
 - `scripts/prepare_inputs.py`：抽取全部页文本、记录参考文件哈希，按需渲染指定 PDF 页。输出放工作输出目录，保持 `ref_papers/` 和 `ref/` 不变。
-- `scripts/diagram-kit.mjs`：可编辑形状、箭头、自由曲线、层状材料和三角自旋对象工具；运行时依赖 `@oai/artifact-tool`。按实际学科扩展，不能把 Mn₃Sn 自旋图当作所有论文的通用图标。
-- `scripts/draw_mn3sn.mjs` 与 `scripts/run_mn3sn.ps1`：本地示例论文 `acs.nanolett.6c03042.pdf` 的专用、可重建绘图实例。脚本不自动理解任意论文，换论文必须先重做证据映射，再编写新的构图脚本，禁止只替换标题。
-- `scripts/group_native.py`：用 OOXML 将指定前缀的原生对象组合，不栅格化。当前前缀针对示例论文；新图应更新分组规则和对象检查条件。
-- `scripts/finalize.mjs`：调用已安装 presentations 技能的 PPTX 校验工具；路径通过参数指定。
+- `scripts/diagram-kit.mjs`：原生形状、文本、箭头、自由曲线、分区和几何体工具；不包含特定学科的预设对象。根据本次论文，在输出目录 `build/` 编写独立构图脚本，不把论文专用代码放入技能源目录。
+- `scripts/run_diagram.ps1`：接受本次生成的构图脚本路径，执行生成、可选分组、校验和预览导出。
+- `scripts/group_native.py`：按本次配置指定的幻灯片和对象名称前缀进行原生对象分组，不预设分组名称或对象数量。无分组时保留原文件结构。
+- `scripts/finalize.mjs`：根据本次配置的画布、页数及字体调用已安装 presentations 技能的校验工具。
 - `scripts/export_powerpoint.ps1`：使用本机 PowerPoint 后台只读打开并导出真实 PNG 预览；不会退出用户的 PowerPoint 应用。不可用时选其他真实 PPTX 渲染器。
 
-运行前从环境查询运行时路径，将 Node、模块、Python 和 presentations 技能目录传给入口脚本；不硬编码本机用户名到可复用代码。默认不自动安装缺失的依赖。示例重建命令：
-
-```powershell
-.\scripts\run_mn3sn.ps1 -RuntimeNode <node.exe> -RuntimeNodeModules <node_modules> -RuntimePython <python.exe> -PresentationsSkill <presentations技能目录>
-```
-
-已检查参考集的风格记录见 [style-guide.md](references/style-guide.md)，参考改变时更新，保留其他用户已有偏好。优先复用真实可运行的组件，不预先增加无用途的图标库。
+运行接口见 [通用构建协议](references/build-contract.md)。运行时路径由环境查询后传入，不写死用户名或自动安装缺失依赖。每次根据实际 `ref/` 生成风格记录，写入本次输出的 `drawing-notes.md`；技能不预置某一用户参考集的配色和布局。库内的默认值只是可覆盖的起始值，不代表用户偏好。
 
 ### 1. 建立论文证据与关系图
 

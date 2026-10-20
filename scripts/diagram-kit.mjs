@@ -36,15 +36,6 @@ export function diagramKit(slide, {font='Microsoft YaHei', ink='#233858'}={}) {
     line(name+'-title-rule',x,y+44,x+w,y+44,ink,1.4);
     text(name+'-title',title,x+18,y+5,w-36,32,24,ink,true);
   };
-  const spins=(name,cx,cy,r,reverse=false)=>{
-    const pts=[-90,30,150].map(a=>[cx+r*Math.cos(a*Math.PI/180),cy+r*Math.sin(a*Math.PI/180)]);
-    poly(name+'-triangle',pts,'#F3F0F7','#A3AABD',1.2);
-    pts.forEach((p,i)=>{
-      ellipse(name+'-Mn',p[0]-6,p[1]-6,12,12,'#D49D73',ink,1);
-      const a=([0,120,240][i]+(reverse?180:0))*Math.PI/180;
-      arrow(name+'-spin',p[0]-11*Math.cos(a),p[1]-11*Math.sin(a),p[0]+19*Math.cos(a),p[1]+19*Math.sin(a),'#B95767',2.5,8);
-    });
-  };
   const slab=(name,x,y,w,h,fill,label='',depth=13)=>{
     const d=depth;
     poly(name+'-top',[[x,y],[x+d,y-d],[x+w+d,y-d],[x+w,y]],fill,ink,1.1);
@@ -52,5 +43,5 @@ export function diagramKit(slide, {font='Microsoft YaHei', ink='#233858'}={}) {
     shape('rect',name+'-front',x,y,w,h,fill,ink,1.2);
     if(label)text(name+'-label',label,x+8,y+2,w-16,h-4,19,ink,true,'center');
   };
-  return {shape,text,poly,line,arrow,ellipse,panel,spins,slab};
+  return {shape,text,poly,line,arrow,ellipse,panel,slab};
 }

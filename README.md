@@ -30,14 +30,13 @@
 | 文件 | 用途 |
 | --- | --- |
 | `scripts/prepare_inputs.py` | 全页 PDF 文本抽取、参考文件清单与哈希、指定页面渲染 |
-| `scripts/diagram-kit.mjs` | 原生可编辑形状、层状结构、自旋等绘图组件 |
-| `scripts/draw_mn3sn.mjs` | Mn₃Sn 磁振子力矩论文的专用构图示例 |
+| `scripts/diagram-kit.mjs` | 通用原生形状、自由曲线、箭头和文本组件 |
 | `scripts/group_native.py` | 对指定原生对象进行 OOXML 分组 |
 | `scripts/finalize.mjs` | 调用已安装 presentations 技能的 PPTX 校验工具 |
 | `scripts/export_powerpoint.ps1` | Windows PowerPoint 后台只读打开并导出 PNG |
-| `scripts/run_mn3sn.ps1` | 示例论文的完整重建入口 |
+| `scripts/run_diagram.ps1` | 接收本次构图脚本的通用构建入口 |
 
-示例论文 DOI：`10.1021/acs.nanolett.6c03042`。本仓库不附论文全文或第三方参考截图。更换论文需要重新建立证据映射并编写对应构图，不能只替换示例标题。
+技能源代码保持通用，不包含具体论文或学科的构图案例。每次调用后，根据当前论文的证据和参考图生成独立绘图脚本，保存在本次输出的 `build/` 中。对象分组规则、字体、画布尺寸和页数均由本次任务配置。
 
 ## 依赖与重建
 
@@ -50,7 +49,8 @@
 运行时路径通过参数传入，不写死用户名，也不自动安装依赖：
 
 ```powershell
-.\scripts\run_mn3sn.ps1 `
+.\scripts\run_diagram.ps1 `
+  -DrawingScript '本次输出\build\draw.mjs' `
   -RuntimeNode '路径\node.exe' `
   -RuntimeNodeModules '路径\node_modules' `
   -RuntimePython '路径\python.exe' `
@@ -63,4 +63,4 @@
 
 输出包括 `figure.pptx`、`figure.png`、`drawing-notes.md` 及实际生成源代码。默认保存至 `paper-cartoon-output/`。
 
-论文、参考图、抽取文本、渲染页、本地构建产物及验证记录默认忽略，不上传 GitHub。`references/style-guide.md` 只记录本地示例参考的通用视觉特征，不包含原图。技能要求见 [SKILL.md](SKILL.md)。
+论文、参考图、抽取文本、渲染页、本地构建产物及验证记录默认忽略，不上传 GitHub。本次参考集的风格记录仅写入本次输出，不作为技能的固定风格。构图脚本接口见 [通用构建协议](references/build-contract.md)，技能要求见 [SKILL.md](SKILL.md)。
