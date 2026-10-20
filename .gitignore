@@ -1,0 +1,13 @@
+# Personal paper and visual reference inputs stay local.
+/ref/*
+!/ref/.gitkeep
+/ref_papers/*
+!/ref_papers/.gitkeep
+
+# Generated figures, extracts, local runtime paths and validation receipts.
+/paper-cartoon-output/
+node_modules/
+__pycache__/
+*.py[cod]
+.env
+.env.*
