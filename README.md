@@ -2,6 +2,14 @@
 
 读取论文 PDF，参考个人图库的视觉风格，独立设计研究路线或机制卡通图，生成对象级可编辑的 PowerPoint。
 
+## 效果演示
+
+![Mn₃Sn 磁振子力矩翻转研究路线，涵盖器件制备、霍尔读写、实验结果和机制示意](docs/demo/mn3sn.png)
+
+预览由示例 PowerPoint 导出。下载后可在 PowerPoint 中单独编辑图形、箭头和文字。[下载可编辑 PPTX](docs/demo/mn3sn.pptx)
+
+论文来源见 [Liu 等，Nano Letters，2026](https://doi.org/10.1021/acs.nanolett.6c03042)。
+
 ## 使用
 
 将整个仓库作为名为 `paper-cartoon-ppt` 的技能目录放入 Codex 的技能路径，例如 `~/.codex/skills/paper-cartoon-ppt/`。也可以在对话中指定本地 `SKILL.md` 的绝对路径。
